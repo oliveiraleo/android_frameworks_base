@@ -70,7 +70,10 @@ import java.util.function.Supplier;
 @MainThread
 public class BiometricScheduler<T, U> {
 
-    private static final String TAG = "BiometricScheduler";
+    private static final String BASE_TAG = "BiometricScheduler";
+
+    private boolean mCancel;
+
     // Number of recent operations to keep in our logs for dumpsys
     protected static final int LOG_NUM_RECENT_OPERATIONS = 50;
 
@@ -286,19 +289,6 @@ public class BiometricScheduler<T, U> {
                 LOG_NUM_RECENT_OPERATIONS);
     }
 
-    /**
-     * Returns sensor type for a fingerprint sensor.
-     */
-    @SensorType
-    public static int sensorTypeFromFingerprintProperties(
-            @NonNull FingerprintSensorPropertiesInternal props) {
-        if (props.isAnyUdfpsType()) {
-            return SENSOR_TYPE_UDFPS;
-        }
-
-        return SENSOR_TYPE_FP_OTHER;
-    }
-
     @VisibleForTesting
     public ClientMonitorCallback getInternalCallback() {
         return mInternalCallback;
@@ -359,8 +349,13 @@ public class BiometricScheduler<T, U> {
 
     protected void startNextOperationIfIdleLegacy() {
         if (mCurrentOperation != null) {
-            Slog.v(TAG, "Not idle, current operation: " + mCurrentOperation);
-            return;
+            if (mCancel && !mCurrentOperation.isFinished()) {
+                Slog.v(getTag(), "Not idle, cancelling current operation: " + mCurrentOperation);
+                mCurrentOperation.cancel(mHandler, mInternalCallback);
+            } else {
+                Slog.v(getTag(), "Not idle, current operation: " + mCurrentOperation);
+                return;
+            }
         }
         if (mPendingOperations.isEmpty()) {
             Slog.d(TAG, "No operations, returning to idle");
