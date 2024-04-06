@@ -621,14 +621,9 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
 
     ATRACE_FORMAT("Drawing " RECT_STRING, SK_RECT_ARGS(dirty));
 
-    IRenderPipeline::DrawResult drawResult;
-    {
-        // FrameInfoVisualizer accesses the frame events, which cannot be mutated mid-draw
-        // or it can lead to memory corruption.
-        drawResult = mRenderPipeline->draw(
-                frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue, mContentDrawBounds,
-                mOpaque, mLightInfo, mRenderNodes, &(profiler()), mBufferParams, profilerLock());
-    }
+    const auto drawResult = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry,
+                                                  &mLayerUpdateQueue, mContentDrawBounds, mOpaque,
+                                                  mLightInfo, mRenderNodes, &(profiler()), mBufferParams);
 
     uint64_t frameCompleteNr = getFrameNumber();
 
@@ -881,11 +876,11 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, int32_t surfaceContro
     FrameInfo* frameInfo = instance->getFrameInfoFromLast4(frameNumber, surfaceControlId);
 
     if (frameInfo != nullptr) {
-        std::scoped_lock lock(instance->mFrameInfoMutex);
         frameInfo->set(FrameInfoIndex::FrameCompleted) = std::max(gpuCompleteTime,
                 frameInfo->get(FrameInfoIndex::SwapBuffersCompleted));
         frameInfo->set(FrameInfoIndex::GpuCompleted) = std::max(
                 gpuCompleteTime, frameInfo->get(FrameInfoIndex::CommandSubmissionCompleted));
+        std::scoped_lock lock(instance->mFrameMetricsReporterMutex);
         instance->mJankTracker.finishFrame(*frameInfo, instance->mFrameMetricsReporter, frameNumber,
                                            surfaceControlId);
     }
