@@ -2747,6 +2747,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             return;
         }
 
+        if (mQsController.isExpandImmediate() && !mQsController.getFullyExpanded()) {
+            mNotificationStackScrollLayoutController.setMaxAlphaForExpansion(0f);
+            return;
+        }
+
         if (!migrateClocksToBlueprint()) {
             float alpha = 1f;
             if (mClosingWithAlphaFadeOut && !mExpandingFromHeadsUp
@@ -2758,9 +2763,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 && !mQsController.getFullyExpanded()) {
                 alpha *= mClockPositionResult.clockAlpha;
             }
-            if (mQsController.isExpandImmediate() && !mQsController.getFullyExpanded()) {
-                alpha = 0f;
-            }
+            alpha = (alpha < 0.88f) ? 0f : 1f;
             mNotificationStackScrollLayoutController.setMaxAlphaForExpansion(alpha);
         }
     }
