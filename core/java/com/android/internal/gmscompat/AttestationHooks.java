@@ -88,13 +88,13 @@ public final class AttestationHooks {
         // Alter model name and fingerprint to avoid hardware attestation enforcement
         setBuildField("BRAND", "google");
         setBuildField("MANUFACTURER", "Google");
-        setBuildField("DEVICE", "akita");
-        setBuildField("ID", "AP31.240617.015");
-        setBuildField("FINGERPRINT", "google/akita_beta/akita:15/AP31.240617.015/12207491:user/release-keys");
-        setBuildField("PRODUCT", "akita_beta");
-        setBuildField("MODEL", "Pixel 8a");
+        setBuildField("DEVICE", "oriole");
+        setBuildField("ID", "BP21.241121.009");
+        setBuildField("FINGERPRINT", "google/oriole_beta/oriole:15/BP11.241121.013/12873528:user/release-keys");
+        setBuildField("PRODUCT", "oriole_beta");
+        setBuildField("MODEL", "Pixel 6");
         setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N_MR1);
-        setVersionFieldString("SECURITY_PATCH", "2024-08-05");
+        setVersionFieldString("SECURITY_PATCH", "2024-12-05");
     }
 
     public static void initApplicationBeforeOnCreate(Application app) {
